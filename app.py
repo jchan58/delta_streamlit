@@ -19,7 +19,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     if st.button("🔐 Admin Login"):
-        switch_page("pages/admin_login.py")
+        st.switch_page("pages/admin_login.py")
 with col2:
     if st.button("👤 User Login / Sign Up"):
-        switch_page("pages/user_login.py") 
+        st.switch_page("pages/user_login.py") 
