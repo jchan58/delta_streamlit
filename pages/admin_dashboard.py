@@ -6,14 +6,10 @@ import base64
 
 def get_thumbnail_src(module):
     thumb = module.get("thumbnail")
-
     if not thumb:
         return "https://via.placeholder.com/300x200.png?text=No+Image"
-
-    # Convert bson.binary.Binary → Python bytes
     if isinstance(thumb, Binary):
         thumb = bytes(thumb)
-
     encoded = base64.b64encode(thumb).decode("utf-8")
     return f"data:image/png;base64,{encoded}"
 
@@ -167,6 +163,9 @@ else:
     st.markdown(card_css, unsafe_allow_html=True)
     for module in modules:
         title = module["title"]
+        st.write("TITLE:", module["title"])
+        st.write("THUMB TYPE:", type(module.get("thumbnail")))
+        st.write("THUMB LENGTH:", len(module.get("thumbnail") or b""))
         description = module.get("description", "No description available.")
         st.write("thumbnail field:", module.get("thumbnail"))
         thumbnail = get_thumbnail_src(module)
