@@ -166,6 +166,7 @@ else:
     for module in modules:
         title = module["title"]
         description = module.get("description", "No description available.")
+        st.write("thumbnail field:", module.get("thumbnail"))
         thumbnail = get_thumbnail_src(module)
 
         card_html = f"""
