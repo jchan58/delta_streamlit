@@ -58,8 +58,6 @@ if st.session_state.get("show_create_form", False):
         st.subheader("Create New Module")
 
         new_title = st.text_input("Module Title")
-        new_desc = st.text_area("Module Description")
-
         thumbnail_file = st.file_uploader(
             "Upload Thumbnail Image (optional)",
             type=["png", "jpg", "jpeg"]
@@ -80,7 +78,6 @@ if st.session_state.get("show_create_form", False):
             else:
                 module_doc = {
                     "title": new_title.strip(),
-                    "description": new_desc.strip(),
                     "thumbnail": thumbnail_bytes,
                     "units": [],
                     "created_by": st.session_state.user_email
