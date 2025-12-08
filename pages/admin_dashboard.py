@@ -3,6 +3,10 @@ from pymongo import MongoClient
 from bson import ObjectId
 from bson.binary import Binary
 import base64
+from PIL import Image
+import io
+
+
 
 def get_thumbnail_src(module):
     thumb = module.get("thumbnail")
@@ -10,7 +14,13 @@ def get_thumbnail_src(module):
         return "https://via.placeholder.com/300x200.png?text=No+Image"
     if isinstance(thumb, Binary):
         thumb = bytes(thumb)
-    encoded = base64.b64encode(thumb).decode("utf-8")
+    img = Image.open(io.BytesIO(thumb))
+    img.thumbnail((300, 200))
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    small_png = buffer.getvalue()
+
+    encoded = base64.b64encode(small_png).decode("utf-8")
     return f"data:image/png;base64,{encoded}"
 
 # ------------------------
