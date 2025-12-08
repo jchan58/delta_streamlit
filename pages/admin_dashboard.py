@@ -6,8 +6,6 @@ import base64
 from PIL import Image
 import io
 
-
-
 def get_thumbnail_src(module):
     thumb = module.get("thumbnail")
     if not thumb:
@@ -162,24 +160,16 @@ else:
         thumb_bytes = module.get("thumbnail")
         description = module.get("description", "No description available.")
 
-        st.write("TITLE:", title)
-        st.write("THUMB TYPE:", type(thumb_bytes))
-        st.write("THUMB LENGTH:", len(thumb_bytes or b""))
-        st.write("thumbnail field:", thumb_bytes)
-
-        thumbnail = get_thumbnail_src(module)
-
+        st.write(f"### {title}")
+        if thumb_bytes:
+            st.image(thumb_bytes, width=230)
+        else:
+            st.image("https://via.placeholder.com/300x200.png?text=No+Image", width=230)
         card_html = f"""
-        <div class="module-wrapper">
-            <div class="module-title">{title}</div>
-
-            <div class="module-card">
-                <img src="{thumbnail}" class="module-image"/>
-                <div class="module-overlay">{description}</div>
-            </div>
+        <div class="module-card">
+            <div class="module-overlay">{description}</div>
         </div>
         """
-
         st.markdown(card_html, unsafe_allow_html=True)
         # Edit/Delete buttons
         colA, colB = st.columns([1, 1])
