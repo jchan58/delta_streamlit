@@ -136,20 +136,52 @@ else:
     </style>
     """
     st.markdown(card_css, unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+    .module-card-container {
+        width: 260px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        padding: 12px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .module-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     for module in modules:
         title = module["title"]
         thumb_bytes = module.get("thumbnail")
-        st.write(f"### {title}")
+
+        # Start card container
+        st.markdown('<div class="module-card-container">', unsafe_allow_html=True)
+
+        # Title
+        st.markdown(f'<div class="module-title">{title}</div>', unsafe_allow_html=True)
+
+        # Image
         if thumb_bytes:
-            st.image(thumb_bytes, width=230)
+            st.image(thumb_bytes, width=240)
         else:
-            st.image("https://via.placeholder.com/300x200.png?text=No+Image", width=230)
-        colA, colB = st.columns([1, 1])
+            st.image("https://via.placeholder.com/300x200.png?text=No+Image", width=240)
+
+        # Buttons inside the card
+        colA, colB = st.columns(2)
         with colA:
             if st.button("✏️ Edit", key=f"edit_{module['_id']}"):
                 st.switch_page(f"pages/edit_module?module_id={module['_id']}")
+
         with colB:
             if st.button("🗑️ Delete", key=f"delete_{module['_id']}"):
                 modules_collection.delete_one({"_id": module["_id"]})
                 st.warning("Module deleted.")
                 st.rerun()
+
+        # Close card container
+        st.markdown('</div>', unsafe_allow_html=True)
