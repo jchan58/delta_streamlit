@@ -1,6 +1,14 @@
 import streamlit as st
 from pymongo import MongoClient
 from bson import ObjectId
+import base64
+
+def get_thumbnail_src(module):
+    if module.get("thumbnail"):
+        encoded = base64.b64encode(module["thumbnail"]).decode()
+        return f"data:image/png;base64,{encoded}"
+    else:
+        return "https://via.placeholder.com/300x200.png?text=No+Image"
 
 # ------------------------
 # Authentication check
@@ -69,12 +77,12 @@ if st.session_state.get("show_create_form", False):
             # Save thumbnail (optional)
             thumbnail_bytes = None
             if thumbnail_file:
-                thumbnail_bytes = thumbnail_file.read()  # stored as raw bytes
+                thumbnail_bytes = thumbnail_file.read()
 
             module_doc = {
                 "title": new_title.strip(),
                 "description": new_desc.strip(),
-                "thumbnail": thumbnail_bytes,   # store raw file bytes
+                "thumbnail": thumbnail_bytes,  
                 "units": [],
                 "created_by": st.session_state.user_email
             }
@@ -99,7 +107,7 @@ else:
     for module in modules:
         title = module["title"]
         description = module.get("description", "No description available.")
-        thumbnail = module.get("thumbnail_url", "default_thumbnail.png")
+        thumbnail = get_thumbnail_src(module)
 
         card_html = f"""
         <style>
