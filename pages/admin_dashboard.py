@@ -163,11 +163,14 @@ else:
     st.markdown(card_css, unsafe_allow_html=True)
     for module in modules:
         title = module["title"]
-        st.write("TITLE:", module["title"])
-        st.write("THUMB TYPE:", type(module.get("thumbnail")))
-        st.write("THUMB LENGTH:", len(module.get("thumbnail") or b""))
+        thumb_bytes = module.get("thumbnail")
         description = module.get("description", "No description available.")
-        st.write("thumbnail field:", module.get("thumbnail"))
+
+        st.write("TITLE:", title)
+        st.write("THUMB TYPE:", type(thumb_bytes))
+        st.write("THUMB LENGTH:", len(thumb_bytes or b""))
+        st.write("thumbnail field:", thumb_bytes)
+
         thumbnail = get_thumbnail_src(module)
 
         card_html = f"""
