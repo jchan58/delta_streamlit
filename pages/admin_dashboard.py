@@ -66,13 +66,10 @@ if st.session_state.get("show_create_form", False):
 
     if cancel:
         st.session_state.show_create_form = False
-        st.experimental_rerun()
+        st.rerun()
 
 st.markdown("---")
 
-# ------------------------
-# Existing Modules List
-# ------------------------
 modules = list(modules_collection.find())
 
 if not modules:
@@ -81,10 +78,9 @@ else:
     for module in modules:
         st.subheader(module["title"])
         st.write(f"**Description:** {module.get('description', '')}")
-        st.write(f"**Units:** {len(module.get('units', [])})")
+        st.write(f"**Units:** {len(module.get('units', []))}")
 
         col1, col2 = st.columns([1,1])
-
         with col1:
             if st.button("✏️ Edit", key=f"edit_{module['_id']}"):
                 st.switch_page(f"pages/edit_module?module_id={module['_id']}")
@@ -93,6 +89,4 @@ else:
             if st.button("🗑️ Delete", key=f"delete_{module['_id']}"):
                 modules_collection.delete_one({"_id": module["_id"]})
                 st.warning("Module deleted.")
-                st.experimental_rerun()
-
-        st.markdown("---")
+                st.rerun()
