@@ -64,4 +64,5 @@ with tab_signup:
             st.error("An account with this email already exists.")
         else:
             register_user(email, signup_pw)
-            st.success("Account created! Please log in now.")
+            st.success("Account created! Redirecting you to modules page.")
+            st.switch_page("pages/user_dashboard.py")
