@@ -1,14 +1,19 @@
 import streamlit as st
 from pymongo import MongoClient
 from bson import ObjectId
+from bson.binary import Binary
 import base64
 
 def get_thumbnail_src(module):
-    if module.get("thumbnail"):
-        encoded = base64.b64encode(module["thumbnail"]).decode()
-        return f"data:image/png;base64,{encoded}"
-    else:
+    data = module.get("thumbnail")
+    if not data:
         return "https://via.placeholder.com/300x200.png?text=No+Image"
+
+    if isinstance(data, Binary):
+        data = bytes(data)
+
+    encoded = base64.b64encode(data).decode("utf-8")
+    return f"data:image/png;base64,{encoded}"
 
 # ------------------------
 # Authentication check
@@ -60,7 +65,8 @@ if st.session_state.get("show_create_form", False):
 
     # Show preview if uploaded
     if thumbnail_file:
-        st.image(thumbnail_file, width=200, caption="Thumbnail Preview")
+        thumbnail_bytes = thumbnail_file.read()
+        st.image(thumbnail_bytes)
 
     # Buttons
     colA, colSpacer, colG = st.columns([1,5,1])
