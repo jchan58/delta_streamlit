@@ -130,22 +130,6 @@ else:
         height: 100%;
         object-fit: cover;
     }
-    .module-overlay {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; 
-        height: 100%;
-        background: rgba(0,0,0,0.65);
-        color: white;
-        opacity: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 10px;
-        font-size: 14px;
-        transition: opacity 0.25s ease;
-    }
     .module-card:hover .module-overlay {
         opacity: 1;
     }
@@ -155,25 +139,15 @@ else:
     for module in modules:
         title = module["title"]
         thumb_bytes = module.get("thumbnail")
-        description = module.get("description", "No description available.")
-
         st.write(f"### {title}")
         if thumb_bytes:
             st.image(thumb_bytes, width=230)
         else:
             st.image("https://via.placeholder.com/300x200.png?text=No+Image", width=230)
-        card_html = f"""
-        <div class="module-card">
-            <div class="module-overlay">{description}</div>
-        </div>
-        """
-        st.markdown(card_html, unsafe_allow_html=True)
-        # Edit/Delete buttons
         colA, colB = st.columns([1, 1])
         with colA:
             if st.button("✏️ Edit", key=f"edit_{module['_id']}"):
                 st.switch_page(f"pages/edit_module?module_id={module['_id']}")
-
         with colB:
             if st.button("🗑️ Delete", key=f"delete_{module['_id']}"):
                 modules_collection.delete_one({"_id": module["_id"]})
