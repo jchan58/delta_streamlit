@@ -136,67 +136,48 @@ else:
     </style>
     """
     st.markdown(card_css, unsafe_allow_html=True)
-    st.markdown("""
-    <style>
-    .module-card-container {
-        width: 260px;
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-        padding: 12px;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .module-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 10px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
     for module in modules:
         title = module["title"]
         thumb_bytes = module.get("thumbnail")
 
-        # Start real Streamlit container 
+        # REAL card container
         with st.container():
-
-            # Centered card wrapper (THIS fixes your issue)
+            
+            # Apply shadow + center alignment
             st.markdown("""
-            <div class="module-card-container" style="
+            <div style="
                 width: 260px;
-                background: #ffffff;
-                border-radius: 12px;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-                padding: 15px;
                 margin-left: auto;
                 margin-right: auto;
+                background: #fff;
+                padding: 15px;
+                border-radius: 12px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.08);
                 text-align: center;">
             """, unsafe_allow_html=True)
 
-            # Title
+            # TITLE
             st.markdown(
-                f"<div style='font-size:18px;font-weight:600;margin-bottom:10px;'>{title}</div>",
+                f"<div style='font-size:20px;font-weight:600;margin-bottom:10px;'>{title}</div>",
                 unsafe_allow_html=True
             )
 
-            # Thumbnail centered
+            # IMAGE
             if thumb_bytes:
                 st.image(thumb_bytes, width=240)
             else:
                 st.image("https://via.placeholder.com/300x200.png?text=No+Image", width=240)
 
-            # Buttons inside card
-            colA, colB = st.columns(2)
-            with colA:
+            # BUTTONS
+            col1, col2 = st.columns(2)
+            with col1:
                 if st.button("✏️ Edit", key=f"edit_{module['_id']}"):
                     st.switch_page(f"pages/edit_module?module_id={module['_id']}")
-            with colB:
-                if st.button("🗑️ Delete", key=f"delete_{module['_id']}"):
+            with col2:
+                if st.button("🗑 Delete", key=f"delete_{module['_id']}"):
                     modules_collection.delete_one({"_id": module["_id"]})
                     st.warning("Module deleted.")
                     st.rerun()
 
-            # Close wrapper
+            # CLOSE wrapper
             st.markdown("</div>", unsafe_allow_html=True)
