@@ -68,4 +68,4 @@ elif menu_choice == "Logout":
     st.session_state.user_email = None
     st.session_state.user_role = None
     st.success("Logged out successfully.")
-    st.experimental_rerun()
+    st.rerun()
