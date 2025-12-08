@@ -5,14 +5,16 @@ from bson.binary import Binary
 import base64
 
 def get_thumbnail_src(module):
-    data = module.get("thumbnail")
-    if not data:
+    thumb = module.get("thumbnail")
+
+    if not thumb:
         return "https://via.placeholder.com/300x200.png?text=No+Image"
 
-    if isinstance(data, Binary):
-        data = bytes(data)
+    # Convert bson.binary.Binary → Python bytes
+    if isinstance(thumb, Binary):
+        thumb = bytes(thumb)
 
-    encoded = base64.b64encode(data).decode("utf-8")
+    encoded = base64.b64encode(thumb).decode("utf-8")
     return f"data:image/png;base64,{encoded}"
 
 # ------------------------
