@@ -62,7 +62,7 @@ if st.session_state.get("show_create_form", False):
             })
             st.success("Module created.")
             st.session_state.show_create_form = False
-            st.experimental_rerun()
+            st.rerun()
 
     if cancel:
         st.session_state.show_create_form = False
