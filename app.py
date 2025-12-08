@@ -15,7 +15,6 @@ st.title("📘 Modules Platform for the Hunterian Laboratory")
 st.write("Please select how you want to log in:")
 
 col1, col2 = st.columns(2)
-
 with col1:
     if st.button("🔐 Admin Login"):
         st.switch_page("pages/admin_login.py")
