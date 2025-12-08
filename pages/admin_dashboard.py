@@ -44,10 +44,10 @@ if st.session_state.get("show_create_form", False):
     new_title = st.text_input("Module Title")
     new_desc = st.text_area("Module Description")
 
-    colA, colB, colC, colD, colE, colF,= st.columns([1,1,1,1,1,1])
+    colA, colB, colC, colD, colE, colF, colG= st.columns([1,1,1,1,1,1])
     with colA:
-        create = st.button("Save Module")
-    with colF:
+        create = st.button("Save")
+    with colG:
         cancel = st.button("Cancel")
 
     if create:
