@@ -44,22 +44,43 @@ if st.session_state.get("show_create_form", False):
     new_title = st.text_input("Module Title")
     new_desc = st.text_area("Module Description")
 
-    colA, colB, colC, colD, colE, colF, colG= st.columns([1,1,1,1,1,1,1])
+    # Thumbnail upload
+    thumbnail_file = st.file_uploader(
+        "Upload Thumbnail Image (optional)", 
+        type=["png", "jpg", "jpeg"]
+    )
+
+    # Show preview if uploaded
+    if thumbnail_file:
+        st.image(thumbnail_file, width=200, caption="Thumbnail Preview")
+
+    # Buttons
+    colA, colSpacer, colG = st.columns([1,5,1])
     with colA:
         create = st.button("Save")
     with colG:
         cancel = st.button("Cancel")
 
     if create:
-        if not new_title:
+        if not new_title.strip():
             st.error("Module title is required.")
         else:
-            modules_collection.insert_one({
-                "title": new_title,
-                "description": new_desc,
+
+            # Save thumbnail (optional)
+            thumbnail_bytes = None
+            if thumbnail_file:
+                thumbnail_bytes = thumbnail_file.read()  # stored as raw bytes
+
+            module_doc = {
+                "title": new_title.strip(),
+                "description": new_desc.strip(),
+                "thumbnail": thumbnail_bytes,   # store raw file bytes
                 "units": [],
                 "created_by": st.session_state.user_email
-            })
+            }
+
+            modules_collection.insert_one(module_doc)
+
             st.success("Module created.")
             st.session_state.show_create_form = False
             st.rerun()
