@@ -76,16 +76,86 @@ if not modules:
     st.info("No modules created yet.")
 else:
     for module in modules:
-        st.subheader(module["title"])
-        st.write(f"**Description:** {module.get('description', '')}")
-        st.write(f"**Units:** {len(module.get('units', []))}")
+        title = module["title"]
+        description = module.get("description", "No description available.")
+        thumbnail = module.get("thumbnail_url", "default_thumbnail.png")
 
-        col1, col2 = st.columns([1,1])
-        with col1:
+        card_html = f"""
+        <style>
+        .module-wrapper {{
+            width: 230px;
+            margin-bottom: 15px;
+        }}
+
+        .module-title {{
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 6px;
+        }}
+
+        .module-card {{
+            position: relative;
+            width: 100%;
+            height: 150px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }}
+
+        .module-card:hover {{
+            transform: scale(1.02);
+        }}
+
+        .module-image {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }}
+
+        .module-overlay {{
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65);
+            color: white;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            transition: opacity 0.25s ease;
+        }}
+
+        .module-card:hover .module-overlay {{
+            opacity: 1;
+        }}
+        </style>
+
+        <div class="module-wrapper">
+            <div class="module-title">{title}</div>
+
+            <div class="module-card">
+                <img src="{thumbnail}" class="module-image"/>
+                <div class="module-overlay">{description}</div>
+            </div>
+        </div>
+        """
+
+        st.markdown(card_html, unsafe_allow_html=True)
+
+        # Edit/Delete buttons
+        colA, colB = st.columns([1, 1])
+        with colA:
             if st.button("✏️ Edit", key=f"edit_{module['_id']}"):
                 st.switch_page(f"pages/edit_module?module_id={module['_id']}")
 
-        with col2:
+        with colB:
             if st.button("🗑️ Delete", key=f"delete_{module['_id']}"):
                 modules_collection.delete_one({"_id": module["_id"]})
                 st.warning("Module deleted.")
