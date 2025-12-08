@@ -103,69 +103,66 @@ modules = list(modules_collection.find())
 
 if not modules:
     st.info("No modules created yet.")
+
 else:
+    card_css = """
+    <style>
+    .module-wrapper {
+        width: 230px;
+        margin-bottom: 15px;
+    }
+    .module-title {
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 6px;
+    }
+    .module-card {
+        position: relative;
+        width: 100%;
+        height: 150px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    .module-card:hover {
+        transform: scale(1.02);
+    }
+    .module-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .module-overlay {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; 
+        height: 100%;
+        background: rgba(0,0,0,0.65);
+        color: white;
+        opacity: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 10px;
+        font-size: 14px;
+        transition: opacity 0.25s ease;
+    }
+    .module-card:hover .module-overlay {
+        opacity: 1;
+    }
+    </style>
+    """
+    st.markdown(card_css, unsafe_allow_html=True)
     for module in modules:
         title = module["title"]
         description = module.get("description", "No description available.")
         thumbnail = get_thumbnail_src(module)
 
         card_html = f"""
-        <style>
-        .module-wrapper {{
-            width: 230px;
-            margin-bottom: 15px;
-        }}
-
-        .module-title {{
-            font-size: 18px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 6px;
-        }}
-
-        .module-card {{
-            position: relative;
-            width: 100%;
-            height: 150px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }}
-
-        .module-card:hover {{
-            transform: scale(1.02);
-        }}
-
-        .module-image {{
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }}
-
-        .module-overlay {{
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.65);
-            color: white;
-            opacity: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 10px;
-            font-size: 14px;
-            transition: opacity 0.25s ease;
-        }}
-
-        .module-card:hover .module-overlay {{
-            opacity: 1;
-        }}
-        </style>
-
         <div class="module-wrapper">
             <div class="module-title">{title}</div>
 
@@ -177,7 +174,6 @@ else:
         """
 
         st.markdown(card_html, unsafe_allow_html=True)
-
         # Edit/Delete buttons
         colA, colB = st.columns([1, 1])
         with colA:
