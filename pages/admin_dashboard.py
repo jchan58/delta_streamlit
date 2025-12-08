@@ -45,61 +45,47 @@ with col2:
         st.session_state["show_create_form"] = True
 
 
-# ------------------------
-# Create Module Form (Shown only when + is clicked)
-# ------------------------
 if st.session_state.get("show_create_form", False):
+    with st.form("create_module_form", clear_on_submit=False):
+        st.subheader("Create New Module")
 
-    st.subheader("Create New Module")
+        new_title = st.text_input("Module Title")
+        new_desc = st.text_area("Module Description")
 
-    new_title = st.text_input("Module Title")
-    new_desc = st.text_area("Module Description")
+        thumbnail_file = st.file_uploader(
+            "Upload Thumbnail Image (optional)",
+            type=["png", "jpg", "jpeg"]
+        )
 
-    # Thumbnail upload
-    thumbnail_file = st.file_uploader(
-        "Upload Thumbnail Image (optional)", 
-        type=["png", "jpg", "jpeg"]
-    )
+        thumbnail_bytes = None
+        if thumbnail_file:
+            thumbnail_bytes = thumbnail_file.read()
+            st.image(thumbnail_bytes)
 
-    # Show preview if uploaded
-    if thumbnail_file:
-        thumbnail_bytes = thumbnail_file.read()
-        st.image(thumbnail_bytes)
+        # Form buttons
+        submitted = st.form_submit_button("Save")
+        canceled = st.form_submit_button("Cancel")
 
-    # Buttons
-    colA, colSpacer, colG = st.columns([1,5,1])
-    with colA:
-        create = st.button("Save")
-    with colG:
-        cancel = st.button("Cancel")
+        if submitted:
+            if not new_title.strip():
+                st.error("Module title is required.")
+            else:
+                module_doc = {
+                    "title": new_title.strip(),
+                    "description": new_desc.strip(),
+                    "thumbnail": thumbnail_bytes,
+                    "units": [],
+                    "created_by": st.session_state.user_email
+                }
 
-    if create:
-        if not new_title.strip():
-            st.error("Module title is required.")
-        else:
+                modules_collection.insert_one(module_doc)
+                st.success("Module created.")
+                st.session_state.show_create_form = False
+                st.rerun()
 
-            # Save thumbnail (optional)
-            thumbnail_bytes = None
-            if thumbnail_file:
-                thumbnail_bytes = thumbnail_file.read()
-
-            module_doc = {
-                "title": new_title.strip(),
-                "description": new_desc.strip(),
-                "thumbnail": thumbnail_bytes,  
-                "units": [],
-                "created_by": st.session_state.user_email
-            }
-
-            modules_collection.insert_one(module_doc)
-
-            st.success("Module created.")
+        if canceled:
             st.session_state.show_create_form = False
             st.rerun()
-
-    if cancel:
-        st.session_state.show_create_form = False
-        st.rerun()
 
 st.markdown("---")
 
