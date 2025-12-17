@@ -28,6 +28,15 @@ def get_thumbnail_src(module):
     encoded = base64.b64encode(small_png).decode("utf-8")
     return f"data:image/png;base64,{encoded}"
 
+def get_next_module_id(collection):
+    last_module = collection.find_one(
+        {"module_id": {"$exists": True}},
+        sort=[("module_id", -1)]
+    )
+    if last_module is None:
+        return 0
+    return last_module["module_id"] + 1
+
 # ------------------------
 # Authentication check
 # ------------------------
@@ -83,7 +92,9 @@ if st.session_state.get("show_create_form", False):
             if not new_title.strip():
                 st.error("Module title is required.")
             else:
+                next_module_id = get_next_module_id(modules_collection)
                 module_doc = {
+                    "module_id": next_module_id,
                     "title": new_title.strip(),
                     "thumbnail": thumbnail_bytes,
                     "units": [],
@@ -91,6 +102,9 @@ if st.session_state.get("show_create_form", False):
                 }
 
                 modules_collection.insert_one(module_doc)
+                st.switch_page(
+                    f"pages/edit_module?module_id={next_module_id}&mode=create_unit"
+                )
                 st.success("Module created.")
                 st.session_state.show_create_form = False
                 st.rerun()
@@ -131,9 +145,9 @@ for i, module in enumerate(modules):
             # Buttons
             b1, b2 = st.columns(2)
             with b1:
-                if st.button("✏️ Edit", key=f"edit_{module['_id']}"):
+                if st.button("✏️ Edit", key=f"edit_{module['module_id']}"):
                     st.switch_page(
-                        f"pages/edit_module?module_id={module['_id']}"
+                        f"pages/edit_module?module_id={module['module_id']}"
                     )
 
             with b2:
