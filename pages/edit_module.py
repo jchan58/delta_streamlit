@@ -62,7 +62,7 @@ else:
 if st.session_state.show_create_unit:
     st.markdown("---")
     with st.form("create_unit_form"):
-        st.markdown("## ➕ Create Unit")
+        st.markdown("## Create Unit")
 
         unit_title = st.text_input("Unit title")
 
