@@ -50,8 +50,6 @@ with c2:
 # Existing units
 # ------------------------
 units = module.get("units", [])
-
-st.markdown("### Existing Units")
 if not units:
     st.info("No units yet.")
 else:
