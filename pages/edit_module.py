@@ -32,11 +32,6 @@ if "show_create_unit" not in st.session_state:
 if "new_unit_items" not in st.session_state:
     st.session_state.new_unit_items = []
 
-if "new_item_title" not in st.session_state:
-    st.session_state.new_item_title = ""
-
-if "new_item_type" not in st.session_state:
-    st.session_state.new_item_type = "video"
 # ------------------------
 # Page header
 # ------------------------
@@ -79,17 +74,11 @@ if st.session_state.show_create_unit:
                 st.write(f"{i + 1}. {item['title']} ({item['type']})")
 
         st.markdown("### Add an item")
-        item_title = st.text_input(
-            "Item title",
-            key="new_item_title"
-        )
-
+        item_title = st.text_input("Item title")
         item_type = st.selectbox(
             "Item type",
-            ["video", "file", "quiz"],
-            key="new_item_type"
+            ["video", "file", "quiz"]
         )
-
         add_item = st.form_submit_button("➕ Add item")
         create_unit = st.form_submit_button("Create Unit")
         cancel = st.form_submit_button("Cancel")
@@ -98,18 +87,15 @@ if st.session_state.show_create_unit:
     # Handle Add Item
     # ------------------------
     if add_item:
-        if not st.session_state.new_item_title.strip():
+        if not item_title.strip():
             st.error("Item title is required.")
         else:
             next_item_id = len(st.session_state.new_unit_items)
-
             st.session_state.new_unit_items.append({
                 "item_id": next_item_id,
-                "title": st.session_state.new_item_title.strip(),
-                "type": st.session_state.new_item_type
+                "title": item_title.strip(),
+                "type": item_type
             })
-            st.session_state["new_item_title"] = ""
-            st.session_state["new_item_type"] = "video"
             st.rerun()
 
     # ------------------------
