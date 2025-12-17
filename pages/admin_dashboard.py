@@ -102,9 +102,9 @@ if st.session_state.get("show_create_form", False):
                 }
 
                 modules_collection.insert_one(module_doc)
-                st.switch_page(
-                    f"pages/edit_module?module_id={next_module_id}&mode=create_unit"
-                )
+                st.query_params["module_id"] = str(next_module_id)
+                st.query_params["mode"] = "create_unit"
+                st.switch_page("pages/edit_module.py")
                 st.success("Module created.")
                 st.session_state.show_create_form = False
                 st.rerun()
