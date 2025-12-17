@@ -32,6 +32,11 @@ if "show_create_unit" not in st.session_state:
 if "new_unit_items" not in st.session_state:
     st.session_state.new_unit_items = []
 
+if "new_item_title" not in st.session_state:
+    st.session_state.new_item_title = ""
+
+if "new_item_type" not in st.session_state:
+    st.session_state.new_item_type = "video"
 # ------------------------
 # Page header
 # ------------------------
@@ -103,8 +108,8 @@ if st.session_state.show_create_unit:
                 "title": st.session_state.new_item_title.strip(),
                 "type": st.session_state.new_item_type
             })
-            st.session_state.new_item_title = ""
-            st.session_state.new_item_type = "video"
+            st.session_state["new_item_title"] = ""
+            st.session_state["new_item_type"] = "video"
             st.rerun()
 
     # ------------------------
