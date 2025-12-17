@@ -6,8 +6,8 @@ client = MongoClient(st.secrets["MONGO_URI"])
 db = client["delta"]
 modules_collection = db["modules"]
 
-params = st.query_params
-module_id = params.get("module_id")
+module_id = st.session_state.get("module_id")
+mode = st.session_state.get("mode", "edit")
 
 if module_id is None:
     st.error("Missing module_id")
