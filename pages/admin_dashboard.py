@@ -6,6 +6,13 @@ import base64
 from PIL import Image
 import io
 
+def normalize_thumbnail(img_bytes, size=(300, 200)):
+    img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+    img = img.resize(size, Image.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
 def get_thumbnail_src(module):
     thumb = module.get("thumbnail")
     if not thumb:
@@ -98,41 +105,38 @@ modules = list(modules_collection.find())
 
 if not modules:
     st.info("No modules created yet.")
+cols_per_row = 3
+cols = st.columns(cols_per_row)
 
-else:
-    cols_per_row = 3
-    cols = st.columns(cols_per_row)
+for i, module in enumerate(modules):
+    col = cols[i % cols_per_row]
 
-    for i, module in enumerate(modules):
-        col = cols[i % cols_per_row]
+    with col:
+        with st.container(border=True):
 
-        with col:
-            # Card container (Streamlit-native)
-            st.markdown(
-                f"<div style='font-size:18px;font-weight:600;margin-bottom:8px;'>"
-                f"{module['title']}</div>",
-                unsafe_allow_html=True
-            )
+            # Title
+            st.subheader(module["title"])
 
+            # Thumbnail (normalized)
             if module.get("thumbnail"):
-                st.image(module["thumbnail"], use_container_width=True)
+                img_bytes = normalize_thumbnail(module["thumbnail"])
+                st.image(img_bytes, use_container_width=True)
             else:
                 st.image(
                     "https://via.placeholder.com/300x200.png?text=No+Image",
                     use_container_width=True
                 )
 
-            btn1, btn2 = st.columns(2)
-            with btn1:
+            # Buttons
+            b1, b2 = st.columns(2)
+            with b1:
                 if st.button("✏️ Edit", key=f"edit_{module['_id']}"):
                     st.switch_page(
                         f"pages/edit_module?module_id={module['_id']}"
                     )
 
-            with btn2:
+            with b2:
                 if st.button("🗑 Delete", key=f"delete_{module['_id']}"):
-                    modules_collection.delete_one(
-                        {"_id": module["_id"]}
-                    )
+                    modules_collection.delete_one({"_id": module["_id"]})
                     st.warning("Module deleted.")
                     st.rerun()
