@@ -107,7 +107,6 @@ if st.session_state.get("show_create_form", False):
                 st.switch_page("pages/edit_module.py")
                 st.success("Module created.")
                 st.session_state.show_create_form = False
-                st.rerun()
 
         if canceled:
             st.session_state.show_create_form = False
