@@ -113,10 +113,11 @@ for i, module in enumerate(modules):
 
     with col:
         with st.container(border=True):
-
-            # Title
-            st.subheader(module["title"])
-
+            st.markdown(
+                f"<p style='text-align:center; font-size:16px; font-weight:600; margin-bottom:8px;'>"
+                f"{module['title']}</p>",
+                unsafe_allow_html=True
+            )
             # Thumbnail (normalized)
             if module.get("thumbnail"):
                 img_bytes = normalize_thumbnail(module["thumbnail"])
