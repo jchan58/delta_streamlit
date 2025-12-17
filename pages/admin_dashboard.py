@@ -146,9 +146,9 @@ for i, module in enumerate(modules):
             b1, b2 = st.columns(2)
             with b1:
                 if st.button("✏️ Edit", key=f"edit_{module['module_id']}"):
-                    st.switch_page(
-                        f"pages/edit_module?module_id={module['module_id']}"
-                    )
+                    st.query_params["module_id"] = str(module["module_id"])
+                    st.query_params["mode"] = "edit"
+                    st.switch_page("pages/edit_module.py")
 
             with b2:
                 if st.button("🗑 Delete", key=f"delete_{module['_id']}"):
