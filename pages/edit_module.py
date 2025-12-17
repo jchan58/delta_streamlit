@@ -1,5 +1,6 @@
 import streamlit as st
 from pymongo import MongoClient
+st.write("DEBUG – query params:", st.query_params)
 
 client = MongoClient(st.secrets["MONGO_URI"])
 db = client["delta"]
