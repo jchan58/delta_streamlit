@@ -100,84 +100,39 @@ if not modules:
     st.info("No modules created yet.")
 
 else:
-    card_css = """
-    <style>
-    .module-wrapper {
-        width: 230px;
-        margin-bottom: 15px;
-    }
-    .module-title {
-        font-size: 18px;
-        font-weight: 600;
-        text-align: center;
-        margin-bottom: 6px;
-    }
-    .module-card {
-        position: relative;
-        width: 100%;
-        height: 150px;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-        cursor: pointer;
-        transition: transform 0.2s ease;
-    }
-    .module-card:hover {
-        transform: scale(1.02);
-    }
-    .module-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    .module-card:hover .module-overlay {
-        opacity: 1;
-    }
-    </style>
-    """
-    st.markdown(card_css, unsafe_allow_html=True)
-    for module in modules:
-        title = module["title"]
-        thumb_bytes = module.get("thumbnail")
+    cols_per_row = 3
+    cols = st.columns(cols_per_row)
 
-        # REAL card container
-        with st.container():
-            
-            # Apply shadow + center alignment
-            st.markdown("""
-            <div style="
-                width: 260px;
-                margin-left: auto;
-                margin-right: auto;
-                background: #fff;
-                padding: 15px;
-                border-radius: 12px;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-                text-align: center;">
-            """, unsafe_allow_html=True)
+    for i, module in enumerate(modules):
+        col = cols[i % cols_per_row]
 
-            # TITLE
+        with col:
+            # Card container (Streamlit-native)
             st.markdown(
-                f"<div style='font-size:20px;font-weight:600;margin-bottom:10px;'>{title}</div>",
+                f"<div style='font-size:18px;font-weight:600;margin-bottom:8px;'>"
+                f"{module['title']}</div>",
                 unsafe_allow_html=True
             )
 
-            # IMAGE
-            if thumb_bytes:
-                st.image(thumb_bytes, width=240)
+            if module.get("thumbnail"):
+                st.image(module["thumbnail"], use_container_width=True)
             else:
-                st.image("https://via.placeholder.com/300x200.png?text=No+Image", width=240)
+                st.image(
+                    "https://via.placeholder.com/300x200.png?text=No+Image",
+                    use_container_width=True
+                )
 
-            # BUTTONS
-            col1, col2 = st.columns(2)
-            with col1:
+            btn1, btn2 = st.columns(2)
+            with btn1:
                 if st.button("✏️ Edit", key=f"edit_{module['_id']}"):
-                    st.switch_page(f"pages/edit_module?module_id={module['_id']}")
-            with col2:
+                    st.switch_page(
+                        f"pages/edit_module?module_id={module['_id']}"
+                    )
+
+            with btn2:
                 if st.button("🗑 Delete", key=f"delete_{module['_id']}"):
-                    modules_collection.delete_one({"_id": module["_id"]})
+                    modules_collection.delete_one(
+                        {"_id": module["_id"]}
+                    )
                     st.warning("Module deleted.")
                     st.rerun()
-
-            # CLOSE wrapper
-            st.markdown("</div>", unsafe_allow_html=True)
