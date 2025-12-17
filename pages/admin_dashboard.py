@@ -102,8 +102,10 @@ if st.session_state.get("show_create_form", False):
                 }
 
                 modules_collection.insert_one(module_doc)
-                st.query_params["module_id"] = str(next_module_id)
-                st.query_params["mode"] = "create_unit"
+                st.set_query_params(
+                    module_id=str(next_module_id),
+                    mode="create_unit"
+                )
                 st.switch_page("pages/edit_module.py")
                 st.success("Module created.")
                 st.session_state.show_create_form = False
@@ -145,8 +147,10 @@ for i, module in enumerate(modules):
             b1, b2 = st.columns(2)
             with b1:
                 if st.button("✏️ Edit", key=f"edit_{module['module_id']}"):
-                    st.query_params["module_id"] = str(module["module_id"])
-                    st.query_params["mode"] = "edit"
+                    st.set_query_params(
+                        module_id=str(module["module_id"]),
+                        mode="edit"
+                    )
                     st.switch_page("pages/edit_module.py")
 
             with b2:
