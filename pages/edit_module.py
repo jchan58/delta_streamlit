@@ -92,12 +92,14 @@ if st.session_state.show_create_unit:
             "Item type",
             ["video", "file", "quiz"]
         )
-    uploaded_file = None
-    if item_type == "file":
-        uploaded_file = st.file_uploader("Upload a file")
-    add_item = st.form_submit_button("➕ Add item")
-    create_unit = st.form_submit_button("Create Unit")
-    cancel = st.form_submit_button("Cancel")
+
+        uploaded_file = None
+        if item_type == "file":
+            uploaded_file = st.file_uploader("Upload a file")
+
+        add_item = st.form_submit_button("➕ Add item")
+        create_unit = st.form_submit_button("Create Unit")
+        cancel = st.form_submit_button("Cancel")
 
     if add_item:
         if not item_title.strip():
