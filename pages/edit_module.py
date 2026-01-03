@@ -9,6 +9,10 @@ db = client["delta"]
 fs = GridFS(db)
 modules_collection = db["modules"]
 
+if "uploader_key" not in st.session_state:
+    st.session_state.uploader_key = 0
+
+
 def preview_file(file_obj, filename):
     content = file_obj.read()
     
@@ -60,17 +64,22 @@ if not units:
     st.info("No units yet.")
 else:
     for u in sorted(units, key=lambda x: x["unit_id"]):
-        st.write(f"Unit {u['unit_id']}: {u['title']}")
-
-        for item in u.get("items", []):
-            st.write(f"• {item['title']} ({item['type']})")
-
-            if item["type"] == "file" and "file_id" in item:
-                try:
-                    file = fs.get(ObjectId(item["file_id"]))
-                    preview_file(file, item["filename"])
-                except Exception as e:
-                    st.warning(f"Unable to preview file: {e}")
+        with st.expander(f"📘 Unit {u['unit_id']} — {u['title']}", expanded=False):
+            items = u.get("items", [])
+            if not items:
+                st.caption("No items in this unit yet.")
+            else:
+                for item in items:
+                    item_title = item["title"]
+                    item_type = item["type"]
+                    with st.expander(f"📄 {item_title}  •  ({item_type})"):
+                        st.markdown(f"**Type:** `{item_type}`")
+                        if "file_id" in item:
+                            try:
+                                fobj = fs.get(ObjectId(item["file_id"]))
+                                preview_file(fobj, item.get("filename", ""))
+                            except Exception as e:
+                                st.warning(f"Unable to preview file: {e}")
 
 if st.session_state.show_create_unit:
     st.markdown("---")
@@ -94,7 +103,8 @@ if st.session_state.show_create_unit:
         )
 
         uploaded_file = st.file_uploader(
-            "Upload a file (PDF, video, image, etc.)"
+            "Upload a file (PDF, video, image, etc.)",
+            key=f"uploader_{st.session_state.uploader_key}"
         )
 
         add_item = st.form_submit_button("➕ Add item")
@@ -136,6 +146,7 @@ if st.session_state.show_create_unit:
                 new_item["mime_type"] = mime_type
 
             st.session_state.new_unit_items.append(new_item)
+            st.session_state.uploader_key += 1
             st.rerun()
     if create_unit:
         if not unit_title.strip():
