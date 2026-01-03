@@ -64,7 +64,7 @@ if not units:
     st.info("No units yet.")
 else:
     for u in sorted(units, key=lambda x: x["unit_id"]):
-        with st.expander(f"📘 Unit {u['unit_id']} — {u['title']}", expanded=False):
+        with st.expander(f"Unit {u['unit_id']} — {u['title']}", expanded=False):
             items = u.get("items", [])
             if not items:
                 st.caption("No items in this unit yet.")
@@ -72,7 +72,7 @@ else:
                 for item in items:
                     item_title = item["title"]
                     item_type = item["type"]
-                    with st.expander(f"📄 {item_title}  •  ({item_type})"):
+                    with st.expander(f"{item_title})"):
                         st.markdown(f"**Type:** `{item_type}`")
                         if "file_id" in item:
                             try:
