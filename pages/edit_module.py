@@ -72,7 +72,7 @@ else:
                 for item in items:
                     item_title = item["title"]
                     item_type = item["type"]
-                    with st.expander(f"{item_title})"):
+                    with st.expander(f"{item_title}"):
                         st.markdown(f"**Type:** `{item_type}`")
                         if "file_id" in item:
                             try:
@@ -102,9 +102,10 @@ if st.session_state.show_create_unit:
             ["video", "file", "quiz"]
         )
 
-        uploaded_file = st.file_uploader(
-            "Upload a file (PDF, video, image, etc.)",
-            key=f"uploader_{st.session_state.uploader_key}"
+        uploaded_files = st.file_uploader(
+            "Upload files (multiple images allowed)",
+            key=f"uploader_{st.session_state.uploader_key}",
+            accept_multiple_files=True
         )
 
         add_item = st.form_submit_button("➕ Add item")
@@ -115,63 +116,50 @@ if st.session_state.show_create_unit:
     if add_item:
         if not item_title.strip():
             st.error("Item title is required.")
-        elif item_type == "file" and uploaded_file is None:
-            st.error("Please upload a file.")
+        elif item_type == "file" and not uploaded_files:
+            st.error("Please upload at least one file.")
+
         else:
-            file_id = None
-            filename = None
-            mime_type = None
+            if item_type == "file" and uploaded_files:
 
-            if uploaded_file:
-                file_bytes = uploaded_file.read()
-                filename = uploaded_file.name
-                mime_type = uploaded_file.type
+                for f in uploaded_files:
+                    file_bytes = f.read()
+                    filename = f.name
+                    mime_type = f.type
 
-                file_id = fs.put(
-                    file_bytes,
-                    filename=filename,
-                    content_type=mime_type
-                )
+                    file_id = fs.put(
+                        file_bytes,
+                        filename=filename,
+                        content_type=mime_type
+                    )
 
-            next_item_id = len(st.session_state.new_unit_items)
-            new_item = {
-                "item_id": next_item_id,
-                "title": item_title.strip(),
-                "type": item_type
-            }
+                    next_item_id = len(st.session_state.new_unit_items)
 
-            if item_type == "file":
-                new_item["file_id"] = str(file_id)
-                new_item["filename"] = filename
-                new_item["mime_type"] = mime_type
+                    new_item = {
+                        "item_id": next_item_id,
+                        "title": f"{item_title.strip()} — {filename}",
+                        "type": "file",
+                        "file_id": str(file_id),
+                        "filename": filename,
+                        "mime_type": mime_type
+                    }
 
-            st.session_state.new_unit_items.append(new_item)
+                    st.session_state.new_unit_items.append(new_item)
+
+            else:
+                # Non-file item (quiz, video, etc.)
+                next_item_id = len(st.session_state.new_unit_items)
+
+                new_item = {
+                    "item_id": next_item_id,
+                    "title": item_title.strip(),
+                    "type": item_type
+                }
+
+                st.session_state.new_unit_items.append(new_item)
+
+            # reset uploader for next add
             st.session_state.uploader_key += 1
-            st.rerun()
-    if create_unit:
-        if not unit_title.strip():
-            st.error("Unit title is required.")
-        else:
-            next_unit_id = max(
-                [u["unit_id"] for u in units],
-                default=-1
-            ) + 1
-
-            new_unit = {
-                "unit_id": next_unit_id,
-                "title": unit_title.strip(),
-                "items": st.session_state.new_unit_items
-            }
-
-            modules_collection.update_one(
-                {"module_id": module_id},
-                {"$push": {"units": new_unit}}
-            )
-
-            st.session_state.show_create_unit = False
-            st.session_state.new_unit_items = []
-
-            st.success(f"Unit {next_unit_id} created.")
             st.rerun()
 
     if cancel:
