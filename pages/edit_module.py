@@ -1,16 +1,31 @@
 import streamlit as st
 from pymongo import MongoClient
+from gridfs import GridFS
+from bson import ObjectId
+import base64
 
-# ------------------------
-# MongoDB setup
-# ------------------------
 client = MongoClient(st.secrets["MONGO_URI"])
 db = client["delta"]
+fs = GridFS(db)
 modules_collection = db["modules"]
 
-# ------------------------
-# Load module context
-# ------------------------
+def preview_file(file_obj, filename):
+    content = file_obj.read()
+    
+    if file_obj.content_type == "application/pdf":
+        b64_pdf = base64.b64encode(content).decode("utf-8")
+        pdf_display = f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
+        st.markdown(pdf_display, unsafe_allow_html=True)
+    
+    elif file_obj.content_type.startswith("video/"):
+        st.video(content)
+    
+    elif file_obj.content_type.startswith("image/"):
+        st.image(content)
+    
+    else:
+        st.markdown(f"📎 **{filename}** (preview not supported)")
+
 module_id = st.session_state.get("module_id")
 if module_id is None:
     st.error("Missing module_id in session state.")
@@ -23,18 +38,12 @@ if module is None:
     st.error("Module not found.")
     st.stop()
 
-# ------------------------
-# Initialize session state
-# ------------------------
 if "show_create_unit" not in st.session_state:
     st.session_state.show_create_unit = False
 
 if "new_unit_items" not in st.session_state:
     st.session_state.new_unit_items = []
 
-# ------------------------
-# Page header
-# ------------------------
 st.title(f"📘 {module['title']}")
 st.markdown("---")
 
@@ -46,9 +55,6 @@ with c2:
         st.session_state.show_create_unit = True
         st.session_state.new_unit_items = []
 
-# ------------------------
-# Existing units
-# ------------------------
 units = module.get("units", [])
 if not units:
     st.info("No units yet.")
@@ -56,9 +62,16 @@ else:
     for u in sorted(units, key=lambda x: x["unit_id"]):
         st.write(f"Unit {u['unit_id']}: {u['title']}")
 
-# ------------------------
-# Create Unit form
-# ------------------------
+        for item in u.get("items", []):
+            st.write(f"• {item['title']} ({item['type']})")
+
+            if item["type"] == "file" and "file_id" in item:
+                try:
+                    file = fs.get(ObjectId(item["file_id"]))
+                    preview_file(file, item["filename"])
+                except Exception as e:
+                    st.warning(f"Unable to preview file: {e}")
+
 if st.session_state.show_create_unit:
     st.markdown("---")
     with st.form("create_unit_form"):
@@ -79,28 +92,48 @@ if st.session_state.show_create_unit:
             "Item type",
             ["video", "file", "quiz"]
         )
+        uploaded_file = None
+        if item_type == "file":
+            uploaded_file = st.file_uploader("Upload a file")
         add_item = st.form_submit_button("➕ Add item")
         create_unit = st.form_submit_button("Create Unit")
         cancel = st.form_submit_button("Cancel")
 
-    # ------------------------
-    # Handle Add Item
-    # ------------------------
     if add_item:
         if not item_title.strip():
             st.error("Item title is required.")
+        elif item_type == "file" and uploaded_file is None:
+            st.error("Please upload a file.")
         else:
+            file_id = None
+            filename = None
+            mime_type = None
+
+            if item_type == "file":
+                file_bytes = uploaded_file.read()
+                filename = uploaded_file.name
+                mime_type = uploaded_file.type
+
+                file_id = fs.put(
+                    file_bytes,
+                    filename=filename,
+                    content_type=mime_type
+                )
+
             next_item_id = len(st.session_state.new_unit_items)
-            st.session_state.new_unit_items.append({
+            new_item = {
                 "item_id": next_item_id,
                 "title": item_title.strip(),
                 "type": item_type
-            })
-            st.rerun()
+            }
 
-    # ------------------------
-    # Handle Create Unit
-    # ------------------------
+            if item_type == "file":
+                new_item["file_id"] = str(file_id)
+                new_item["filename"] = filename
+                new_item["mime_type"] = mime_type
+
+            st.session_state.new_unit_items.append(new_item)
+            st.rerun()
     if create_unit:
         if not unit_title.strip():
             st.error("Unit title is required.")
