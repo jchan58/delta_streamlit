@@ -65,6 +65,9 @@ if not units:
 else:
     for u in sorted(units, key=lambda x: x["unit_id"]):
         with st.expander(f"Unit {u['unit_id']} — {u['title']}", expanded=False):
+            instruction = u.get("instruction", "").strip()
+            if instruction:
+                st.markdown(f"📝 **Instructions:** {instruction}")
             items = u.get("items", [])
             if not items:
                 st.caption("No items in this unit yet.")
@@ -87,6 +90,7 @@ if st.session_state.show_create_unit:
         st.markdown("## Create Unit")
 
         unit_title = st.text_input("Unit title")
+        unit_instruction = st.text_area("Unit instructions", placeholder="Enter instructional text for this subunit")
 
         st.markdown("### Items in this unit")
         if not st.session_state.new_unit_items:
