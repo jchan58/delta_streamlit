@@ -170,3 +170,24 @@ if st.session_state.show_create_unit:
         st.session_state.show_create_unit = False
         st.session_state.new_unit_items = []
         st.rerun()
+
+    if create_unit:
+        if not unit_title.strip():
+            st.error("Unit title is required.")
+        else:
+            new_unit = {
+                "unit_id": len(units),
+                "title": unit_title.strip(),
+                "instruction": unit_instruction.strip(),
+                "items": st.session_state.new_unit_items
+            }
+
+            modules_collection.update_one(
+                {"module_id": module_id},
+                {"$push": {"units": new_unit}}
+            )
+
+            st.success("Unit created successfully!")
+            st.session_state.show_create_unit = False
+            st.session_state.new_unit_items = []
+            st.rerun()
