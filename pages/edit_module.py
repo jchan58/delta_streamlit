@@ -15,6 +15,9 @@ if "uploader_key" not in st.session_state:
 if "quiz_builder" not in st.session_state:
     st.session_state.quiz_builder = {"questions": []}
 
+if "editing_question_index" not in st.session_state:
+    st.session_state.editing_question_index = None
+
 def preview_file(file_obj, filename):
     content = file_obj.read()
     
@@ -139,22 +142,88 @@ if st.session_state.show_create_unit:
             st.rerun()
 
     st.markdown("### 📋 {item_title}")
-    if not st.session_state.quiz_builder["questions"]:
+    questions = st.session_state.quiz_builder["questions"]
+    if not questions:
         st.caption("No questions added yet.")
     else:
-        for i, q in enumerate(st.session_state.quiz_builder["questions"]):
+        for i, q in enumerate(questions):
 
-            with st.container():
-                st.markdown(f"**Q{i+1}. {q['question']}**")
+            # If this question is in edit mode
+            if st.session_state.editing_question_index == i:
 
+                st.markdown(f"### ✏️ Editing Question {i+1}")
+
+                # Editable fields
+                new_q_text = st.text_input(
+                    "Question text",
+                    value=q["question"],
+                    key=f"edit_qtext_{i}"
+                )
+
+                st.markdown("Answer choices")
+
+                new_choices = []
                 for j, c in enumerate(q["choices"]):
-                    icon = "✅" if j == q["correct_index"] else "➖"
-                    st.write(f"{icon} {c}")
+                    new_choices.append(
+                        st.text_input(
+                            f"Choice {j+1}",
+                            value=c,
+                            key=f"edit_choice_{i}_{j}"
+                        )
+                    )
 
-                # delete button — unique key per question
-                if st.button("🗑️ Delete", key=f"delete_q_{i}"):
-                    st.session_state.quiz_builder["questions"].pop(i)
-                    st.rerun()
+                new_correct = st.radio(
+                    "Correct answer",
+                    options=range(len(new_choices)),
+                    index=q["correct_index"],
+                    format_func=lambda k: f"Choice {k+1}",
+                    key=f"edit_correct_{i}"
+                )
+
+                colA, colB = st.columns(2)
+
+                # Save edits
+                with colA:
+                    if st.button("💾 Save", key=f"save_edit_{i}"):
+
+                        questions[i] = {
+                            "question": new_q_text.strip(),
+                            "choices": new_choices,
+                            "correct_index": new_correct
+                        }
+
+                        st.session_state.editing_question_index = None
+                        st.success("Question updated.")
+                        st.rerun()
+
+                # Cancel editing
+                with colB:
+                    if st.button("❌ Cancel", key=f"cancel_edit_{i}"):
+                        st.session_state.editing_question_index = None
+                        st.rerun()
+
+            else:
+                # Normal view mode
+                with st.container():
+                    st.markdown(f"**Q{i+1}. {q['question']}**")
+
+                    for j, c in enumerate(q["choices"]):
+                        mark = "✅" if j == q["correct_index"] else "➖"
+                        st.write(f"{mark} {c}")
+
+                    col1, col2 = st.columns(2)
+
+                    # Edit button
+                    with col1:
+                        if st.button("✏️ Edit", key=f"edit_q_{i}"):
+                            st.session_state.editing_question_index = i
+                            st.rerun()
+
+                    # Delete button
+                    with col2:
+                        if st.button("🗑️ Delete", key=f"delete_q_{i}"):
+                            questions.pop(i)
+                            st.rerun()
 
 
         item_instruction = st.text_area(
