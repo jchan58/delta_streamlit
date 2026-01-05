@@ -135,9 +135,14 @@ if st.session_state.show_create_unit:
                 format_func=lambda i: f"Choice {i+1}"
             )
 
-            add_q = st.form_submit_button("➕ Save Question", key="save_question_btn")
+            col_q1, col_q2 = st.columns(2)
+            with col_q1:
+                save_q = st.form_submit_button("💾 Save Question", key="save_question_btn")
 
-            if add_q:
+            with col_q2:
+                add_more = st.form_submit_button("➕ Add Another Question", key="add_more_question_btn")
+
+            if save_q or add_more:
                 if not q_text.strip() or any(c.strip() == "" for c in choices):
                     st.error("Please fill in the question and all choices.")
                 else:
@@ -146,14 +151,11 @@ if st.session_state.show_create_unit:
                         "choices": choices,
                         "correct_index": correct_index,
                     })
+
                     st.success("Question added!")
                     st.rerun()
 
-            # ------------------------
-            # QUESTION LIST + EDIT UI
-            # ------------------------
             st.markdown("### 📋 Current Questions")
-
             questions = st.session_state.quiz_builder["questions"]
 
             if not questions:
@@ -248,8 +250,6 @@ if st.session_state.show_create_unit:
         create_unit = st.form_submit_button("Create Unit")
         cancel = st.form_submit_button("Cancel")
 
-
-
     if add_item:
         if not item_title.strip():
             st.error("Item title is required.")
@@ -285,7 +285,6 @@ if st.session_state.show_create_unit:
                     st.session_state.new_unit_items.append(new_item)
 
             else:
-                # Non-file item (quiz, video, etc.)
                 next_item_id = len(st.session_state.new_unit_items)
 
                 new_item = {
@@ -294,11 +293,18 @@ if st.session_state.show_create_unit:
                     "type": item_type,
                     "instruction": item_instruction.strip()
                 }
+
+                # attach quiz questions if quiz item
+                if item_type == "quiz":
+                    new_item["quiz"] = st.session_state.quiz_builder["questions"]
+
                 st.session_state.new_unit_items.append(new_item)
 
-            # reset uploader for next add
-            st.session_state.uploader_key += 1
-            st.rerun()
+                # reset quiz state after saving quiz item
+                st.session_state.quiz_builder = {"questions": []}
+                st.session_state.editing_question_index = None
+                st.session_state.uploader_key += 1
+
 
     if cancel:
         st.session_state.show_create_unit = False
