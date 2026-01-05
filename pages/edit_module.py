@@ -143,11 +143,18 @@ if st.session_state.show_create_unit:
         st.caption("No questions added yet.")
     else:
         for i, q in enumerate(st.session_state.quiz_builder["questions"]):
-            st.markdown(f"**Q{i+1}. {q['question']}**")
 
-            for j, c in enumerate(q["choices"]):
-                icon = "✅" if j == q["correct_index"] else "➖"
-                st.write(f"{icon} {c}")
+            with st.container():
+                st.markdown(f"**Q{i+1}. {q['question']}**")
+
+                for j, c in enumerate(q["choices"]):
+                    icon = "✅" if j == q["correct_index"] else "➖"
+                    st.write(f"{icon} {c}")
+
+                # delete button — unique key per question
+                if st.button("🗑️ Delete", key=f"delete_q_{i}"):
+                    st.session_state.quiz_builder["questions"].pop(i)
+                    st.rerun()
 
 
         item_instruction = st.text_area(
