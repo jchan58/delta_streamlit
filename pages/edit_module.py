@@ -127,7 +127,7 @@ if st.session_state.show_create_unit:
                 format_func=lambda i: f"Choice {i+1}"
             )
 
-            add_q = st.button("➕ Save Question")
+            add_q = st.form_submit_button("➕ Save Question", key="save_question_btn")
 
     if add_q:
         if not q_text.strip() or any(c.strip() == "" for c in choices):
