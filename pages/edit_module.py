@@ -77,6 +77,9 @@ else:
                     item_type = item["type"]
                     with st.expander(f"{item_title}"):
                         st.markdown(f"**Type:** `{item_type}`")
+                        instruction = item.get("instruction", "").strip()
+                        if instruction:
+                            st.markdown(f"📝 **Instructions:** {instruction}")
                         if "file_id" in item:
                             try:
                                 fobj = fs.get(ObjectId(item["file_id"]))
@@ -104,6 +107,10 @@ if st.session_state.show_create_unit:
         item_type = st.selectbox(
             "Item type",
             ["video", "file", "quiz"]
+        )
+        item_instruction = st.text_area(
+            "Subunit instructions (optional)",
+            placeholder="Page Instruction"
         )
 
         uploaded_files = st.file_uploader(
@@ -145,7 +152,8 @@ if st.session_state.show_create_unit:
                         "type": "file",
                         "file_id": str(file_id),
                         "filename": filename,
-                        "mime_type": mime_type
+                        "mime_type": mime_type,
+                        "instruction": item_instruction.strip()
                     }
 
                     st.session_state.new_unit_items.append(new_item)
@@ -157,9 +165,9 @@ if st.session_state.show_create_unit:
                 new_item = {
                     "item_id": next_item_id,
                     "title": item_title.strip(),
-                    "type": item_type
+                    "type": item_type,
+                    "instruction": item_instruction.strip()
                 }
-
                 st.session_state.new_unit_items.append(new_item)
 
             # reset uploader for next add
