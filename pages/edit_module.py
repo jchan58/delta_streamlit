@@ -12,6 +12,8 @@ modules_collection = db["modules"]
 if "uploader_key" not in st.session_state:
     st.session_state.uploader_key = 0
 
+if "quiz_builder" not in st.session_state:
+    st.session_state.quiz_builder = {"questions": []}
 
 def preview_file(file_obj, filename):
     content = file_obj.read()
@@ -108,6 +110,46 @@ if st.session_state.show_create_unit:
             "Item type",
             ["video", "file", "quiz"]
         )
+
+        if item_type == "quiz":
+            st.markdown("### ✍️ Add Quiz Question")
+            q_text = st.text_input("Question text")
+
+            st.markdown("Answer choices")
+            choices = [st.text_input(f"Choice {i+1}") for i in range(4)]
+
+            correct_index = st.radio(
+                "Correct answer",
+                options=range(4),
+                format_func=lambda i: f"Choice {i+1}"
+            )
+
+            add_q = st.button("➕ Save Question")
+
+    if add_q:
+        if not q_text.strip() or any(c.strip() == "" for c in choices):
+            st.error("Please fill in the question and all choices.")
+        else:
+            st.session_state.quiz_builder["questions"].append({
+                "question": q_text.strip(),
+                "choices": choices,
+                "correct_index": correct_index,
+            })
+            st.success("Question added!")
+            st.rerun()
+
+    st.markdown("### 📋 {item_title}")
+    if not st.session_state.quiz_builder["questions"]:
+        st.caption("No questions added yet.")
+    else:
+        for i, q in enumerate(st.session_state.quiz_builder["questions"]):
+            st.markdown(f"**Q{i+1}. {q['question']}**")
+
+            for j, c in enumerate(q["choices"]):
+                icon = "✅" if j == q["correct_index"] else "➖"
+                st.write(f"{icon} {c}")
+
+
         item_instruction = st.text_area(
             "Subunit instructions (optional)",
             placeholder="Page Instruction"
