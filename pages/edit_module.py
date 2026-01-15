@@ -23,25 +23,21 @@ import streamlit.components.v1 as components
 
 def preview_file(file_obj, filename):
     content = file_obj.read()
-    
-    if file_obj.content_type == "application/pdf":
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(content)
-            tmp_path = tmp.name
 
-        components.html(
-            f'<iframe src="file://{tmp_path}" width="100%" height="600"></iframe>',
-            height=620
+    if file_obj.content_type == "application/pdf":
+        st.download_button(
+            "📄 Open PDF",
+            data=content,
+            file_name=filename,
+            mime="application/pdf"
         )
+        st.caption("Click to open in browser PDF viewer.")
 
     elif file_obj.content_type.startswith("video/"):
         st.video(content)
 
     elif file_obj.content_type.startswith("image/"):
         st.image(content)
-
-    else:
-        st.markdown(f"📎 **{filename}** (preview not supported)")
 
 
 module_id = st.session_state.get("module_id")
