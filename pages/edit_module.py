@@ -18,22 +18,31 @@ if "quiz_builder" not in st.session_state:
 if "editing_question_index" not in st.session_state:
     st.session_state.editing_question_index = None
 
+import tempfile
+import streamlit.components.v1 as components
+
 def preview_file(file_obj, filename):
     content = file_obj.read()
     
     if file_obj.content_type == "application/pdf":
-        b64_pdf = base64.b64encode(content).decode("utf-8")
-        pdf_display = f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
-        st.markdown(pdf_display, unsafe_allow_html=True)
-    
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
+
+        components.html(
+            f'<iframe src="file://{tmp_path}" width="100%" height="600"></iframe>',
+            height=620
+        )
+
     elif file_obj.content_type.startswith("video/"):
         st.video(content)
-    
+
     elif file_obj.content_type.startswith("image/"):
         st.image(content)
-    
+
     else:
         st.markdown(f"📎 **{filename}** (preview not supported)")
+
 
 module_id = st.session_state.get("module_id")
 if module_id is None:
