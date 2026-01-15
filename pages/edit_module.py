@@ -33,7 +33,6 @@ def preview_file(file_obj, filename):
         st.download_button("📄 Open PDF", content, filename, "application/pdf", key=f"pdf_{file_obj._id}")
 
     elif mime.startswith("video/") or fname.endswith((".mp4", ".mov", ".webm", ".avi", ".mp3")):
-        st.write("it's a video")
         st.video(content)
 
     elif mime.startswith("image/") or fname.endswith((".png", ".jpg", ".jpeg", ".gif")):
@@ -260,11 +259,11 @@ if st.session_state.show_create_unit:
     if add_item:
         if not item_title.strip():
             st.error("Item title is required.")
-        elif item_type == "file" and not uploaded_files:
+        elif item_type in ["file", "video"] and not uploaded_files:
             st.error("Please upload at least one file.")
 
         else:
-            if item_type == "file" and uploaded_files:
+            if item_type in ["file", "video"] and uploaded_files:
 
                 for f in uploaded_files:
                     file_bytes = f.read()
