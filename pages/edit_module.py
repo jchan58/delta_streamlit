@@ -27,6 +27,9 @@ def preview_file(file_obj, filename):
 
     unique_key = f"pdf_{file_obj._id}" if hasattr(file_obj, "_id") else f"pdf_{filename}"
 
+    st.write("Filename:", filename)
+    st.write("MIME type from GridFS:", file_obj.content_type)
+    st.write("First 20 bytes:", content[:20])
     if mime == "application/pdf" or filename.lower().endswith(".pdf"):
         st.download_button(
             "📄 Open PDF",
@@ -37,6 +40,7 @@ def preview_file(file_obj, filename):
         )
         st.caption("Click to open in browser PDF viewer.")
 
+    
     elif mime.startswith("video/"):
         st.video(content)
 
