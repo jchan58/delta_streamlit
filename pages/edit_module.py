@@ -130,11 +130,12 @@ if st.session_state.show_create_unit:
                 st.write(f"{i + 1}. {item['title']} ({item['type']})")
 
         st.markdown("### Add an item")
-        item_title = st.text_input("Item title")
+        item_title = st.text_input("Item title", key="item_title")
 
         item_type = st.selectbox(
             "Item type",
-            ["video", "file", "quiz"]
+            ["video", "file", "quiz"],
+            key="item_type"
         )
 
         # ------------------------
@@ -253,13 +254,14 @@ if st.session_state.show_create_unit:
         # ------------------------
         item_instruction = st.text_area(
             "Subunit instructions (optional)",
-            placeholder="Page Instruction"
+            placeholder="Page Instruction",
+            key="item_instruction"
         )
 
         uploaded_files = st.file_uploader(
             "Upload files (multiple images allowed)",
-            key=f"uploader_{st.session_state.uploader_key}",
-            accept_multiple_files=True
+            accept_multiple_files=True,
+            key="item_files"
         )
 
         # ------------------------
@@ -323,7 +325,10 @@ if st.session_state.show_create_unit:
                 st.session_state.quiz_builder = {"questions": []}
                 st.session_state.editing_question_index = None
                 st.session_state.uploader_key += 1
-
+                st.session_state.item_title = ""
+                st.session_state.item_instruction = ""
+                st.session_state.item_files = None
+                st.session_state.item_type = "video"
 
     if cancel:
         st.session_state.show_create_unit = False
