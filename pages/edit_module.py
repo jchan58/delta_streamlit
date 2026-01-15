@@ -23,22 +23,25 @@ import streamlit.components.v1 as components
 
 def preview_file(file_obj, filename):
     content = file_obj.read()
+    mime = file_obj.content_type or ""
 
-    if file_obj.content_type == "application/pdf":
+    unique_key = f"pdf_{file_obj._id}" if hasattr(file_obj, "_id") else f"pdf_{filename}"
+
+    if mime == "application/pdf" or filename.lower().endswith(".pdf"):
         st.download_button(
             "📄 Open PDF",
-            data=content,
-            file_name=filename,
-            mime="application/pdf"
+            content,
+            filename,
+            "application/pdf",
+            key=unique_key
         )
         st.caption("Click to open in browser PDF viewer.")
 
-    elif file_obj.content_type.startswith("video/"):
+    elif mime.startswith("video/"):
         st.video(content)
 
-    elif file_obj.content_type.startswith("image/"):
+    elif mime.startswith("image/"):
         st.image(content)
-
 
 module_id = st.session_state.get("module_id")
 if module_id is None:
