@@ -24,28 +24,22 @@ import streamlit.components.v1 as components
 def preview_file(file_obj, filename):
     content = file_obj.read()
     mime = file_obj.content_type or ""
-
-    unique_key = f"pdf_{file_obj._id}" if hasattr(file_obj, "_id") else f"pdf_{filename}"
+    fname = filename.lower()
 
     st.write("Filename:", filename)
     st.write("MIME type from GridFS:", file_obj.content_type)
     st.write("First 20 bytes:", content[:20])
-    if mime == "application/pdf" or filename.lower().endswith(".pdf"):
-        st.download_button(
-            "📄 Open PDF",
-            content,
-            filename,
-            "application/pdf",
-            key=unique_key
-        )
-        st.caption("Click to open in browser PDF viewer.")
+    if mime == "application/pdf" or fname.endswith(".pdf"):
+        st.download_button("📄 Open PDF", content, filename, "application/pdf", key=f"pdf_{file_obj._id}")
 
-    
-    elif mime.startswith("video/"):
+    elif mime.startswith("video/") or fname.endswith((".mp4", ".mov", ".webm", ".avi")):
         st.video(content)
 
-    elif mime.startswith("image/"):
+    elif mime.startswith("image/") or fname.endswith((".png", ".jpg", ".jpeg", ".gif")):
         st.image(content)
+
+    else:
+        st.write("Unknown type:", mime, filename)
 
 module_id = st.session_state.get("module_id")
 if module_id is None:
