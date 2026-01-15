@@ -25,10 +25,6 @@ def preview_file(file_obj, filename):
     content = file_obj.read()
     mime = file_obj.content_type or ""
     fname = filename.lower()
-
-    st.write("Filename:", filename)
-    st.write("MIME type from GridFS:", file_obj.content_type)
-    st.write("First 20 bytes:", content[:20])
     if mime == "application/pdf" or fname.endswith(".pdf"):
         st.download_button("📄 Open PDF", content, filename, "application/pdf", key=f"pdf_{file_obj._id}")
 
@@ -75,7 +71,24 @@ if not units:
     st.info("No units yet.")
 else:
     for u in sorted(units, key=lambda x: x["unit_id"]):
-        with st.expander(f"Unit {u['unit_id']} — {u['title']}", expanded=False):
+        colA, colB = st.columns([0.9, 0.1])
+
+        with colA:
+            header = f"Unit {u['unit_id']} — {u['title']}"
+        with colB:
+            delete_unit = st.button("🗑️", key=f"delete_unit_{u['unit_id']}")
+
+        if delete_unit:
+            new_units = [x for x in units if x["unit_id"] != u["unit_id"]]
+            for i, unit in enumerate(new_units):
+                unit["unit_id"] = i
+            modules_collection.update_one(
+                {"module_id": module_id},
+                {"$pull": {"units": {"unit_id": u["unit_id"]}}}
+            )
+            st.rerun()
+
+        with st.expander(header, expanded=False):
             instruction = u.get("instruction", "").strip()
             if instruction:
                 st.markdown(f"📝 **Instructions:** {instruction}")
