@@ -74,7 +74,7 @@ else:
         colA, colB = st.columns([0.9, 0.1])
 
         with colA:
-            header = f"Unit {u['unit_id']} — {u['title']}"
+            exp = st.expander(f"Unit {u['unit_id']} — {u['title']}", expanded=False)
         with colB:
             delete_unit = st.button("🗑️", key=f"delete_unit_{u['unit_id']}")
 
@@ -84,11 +84,11 @@ else:
                 unit["unit_id"] = i
             modules_collection.update_one(
                 {"module_id": module_id},
-                {"$pull": {"units": {"unit_id": u["unit_id"]}}}
+                {"$set": {"units": new_units}}
             )
             st.rerun()
 
-        with st.expander(header, expanded=False):
+        with exp:
             instruction = u.get("instruction", "").strip()
             if instruction:
                 st.markdown(f"📝 **Instructions:** {instruction}")
