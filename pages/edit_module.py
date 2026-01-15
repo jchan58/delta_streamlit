@@ -32,7 +32,7 @@ def preview_file(file_obj, filename):
     if mime == "application/pdf" or fname.endswith(".pdf"):
         st.download_button("📄 Open PDF", content, filename, "application/pdf", key=f"pdf_{file_obj._id}")
 
-    elif mime.startswith("video/") or fname.endswith((".mp4", ".mov", ".webm", ".avi")):
+    elif mime.startswith("video/") or fname.endswith((".mp4", ".mov", ".webm", ".avi", ".mp3")):
         st.video(content)
 
     elif mime.startswith("image/") or fname.endswith((".png", ".jpg", ".jpeg", ".gif")):
