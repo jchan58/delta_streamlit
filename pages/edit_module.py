@@ -63,7 +63,7 @@ with c1:
     st.subheader("Units")
 with c2:
     if st.button("➕ Add Unit"):
-        st.session_state.open_add_unit = True
+        st.session_state.show_create_unit = True
         st.session_state.new_unit_items = []
 
 units = module.get("units", [])
