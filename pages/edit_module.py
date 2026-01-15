@@ -63,7 +63,7 @@ with c1:
     st.subheader("Units")
 with c2:
     if st.button("➕ Add Unit"):
-        st.session_state.show_create_unit = True
+        st.session_state.open_add_unit = True
         st.session_state.new_unit_items = []
 
 units = module.get("units", [])
@@ -111,163 +111,163 @@ else:
                             except Exception as e:
                                 st.warning(f"Unable to preview file: {e}")
 
-if st.session_state.show_create_unit:
-    st.markdown("---")
-    with st.form("create_unit_form"):
-        st.markdown("## Create Unit")
+if st.session_state.get("open_add_unit", False):
+    with st.dialog("Create Unit"):
+        with st.form("create_unit_form"):
+            st.markdown("## Create Unit")
 
-        unit_title = st.text_input("Unit title")
-        unit_instruction = st.text_area(
-            "Unit instructions",
-            placeholder="Enter instructional text for this subunit"
-        )
-
-        st.markdown("### Items in this unit")
-        if not st.session_state.new_unit_items:
-            st.caption("No items added yet.")
-        else:
-            for i, item in enumerate(st.session_state.new_unit_items):
-                st.write(f"{i + 1}. {item['title']} ({item['type']})")
-
-        st.markdown("### Add an item")
-        item_title = st.text_input("Item title")
-
-        item_type = st.selectbox(
-            "Item type",
-            ["video", "file", "quiz"]
-        )
-
-        # ------------------------
-        # QUIZ BUILDER
-        # ------------------------
-        if item_type == "quiz":
-            st.markdown("### ✍️ Add Quiz Question")
-
-            q_text = st.text_input("Question text")
-
-            st.markdown("Answer choices")
-            choices = [st.text_input(f"Choice {i+1}") for i in range(4)]
-
-            correct_index = st.radio(
-                "Correct answer",
-                options=range(4),
-                format_func=lambda i: f"Choice {i+1}"
+            unit_title = st.text_input("Unit title")
+            unit_instruction = st.text_area(
+                "Unit instructions",
+                placeholder="Enter instructional text for this subunit"
             )
 
-            col_q1, col_q2 = st.columns(2)
-            with col_q1:
-                save_q = st.form_submit_button("💾 Save Question", key="save_question_btn")
-
-            with col_q2:
-                add_more = st.form_submit_button("➕ Add Another Question", key="add_more_question_btn")
-
-            if save_q or add_more:
-                if not q_text.strip() or any(c.strip() == "" for c in choices):
-                    st.error("Please fill in the question and all choices.")
-                else:
-                    st.session_state.quiz_builder["questions"].append({
-                        "question": q_text.strip(),
-                        "choices": choices,
-                        "correct_index": correct_index,
-                    })
-
-                    st.success("Question added!")
-                    st.rerun()
-
-            st.markdown("### 📋 Current Questions")
-            questions = st.session_state.quiz_builder["questions"]
-
-            if not questions:
-                st.caption("No questions added yet.")
+            st.markdown("### Items in this unit")
+            if not st.session_state.new_unit_items:
+                st.caption("No items added yet.")
             else:
-                for i, q in enumerate(questions):
+                for i, item in enumerate(st.session_state.new_unit_items):
+                    st.write(f"{i + 1}. {item['title']} ({item['type']})")
 
-                    if st.session_state.editing_question_index == i:
+            st.markdown("### Add an item")
+            item_title = st.text_input("Item title")
 
-                        st.markdown(f"### ✏️ Editing Question {i+1}")
+            item_type = st.selectbox(
+                "Item type",
+                ["video", "file", "quiz"]
+            )
 
-                        new_q_text = st.text_input(
-                            "Question text",
-                            value=q["question"],
-                            key=f"edit_qtext_{i}"
-                        )
+            # ------------------------
+            # QUIZ BUILDER
+            # ------------------------
+            if item_type == "quiz":
+                st.markdown("### ✍️ Add Quiz Question")
 
-                        st.markdown("Answer choices")
+                q_text = st.text_input("Question text")
 
-                        new_choices = [
-                            st.text_input(
-                                f"Choice {j+1}",
-                                value=c,
-                                key=f"edit_choice_{i}_{j}"
-                            )
-                            for j, c in enumerate(q["choices"])
-                        ]
+                st.markdown("Answer choices")
+                choices = [st.text_input(f"Choice {i+1}") for i in range(4)]
 
-                        new_correct = st.radio(
-                            "Correct answer",
-                            options=range(len(new_choices)),
-                            index=q["correct_index"],
-                            format_func=lambda k: f"Choice {k+1}",
-                            key=f"edit_correct_{i}"
-                        )
+                correct_index = st.radio(
+                    "Correct answer",
+                    options=range(4),
+                    format_func=lambda i: f"Choice {i+1}"
+                )
 
-                        colA, colB = st.columns(2)
+                col_q1, col_q2 = st.columns(2)
+                with col_q1:
+                    save_q = st.form_submit_button("💾 Save Question", key="save_question_btn")
 
-                        with colA:
-                            if st.form_submit_button("💾 Save", key=f"save_edit_{i}"):
-                                questions[i] = {
-                                    "question": new_q_text.strip(),
-                                    "choices": new_choices,
-                                    "correct_index": new_correct
-                                }
-                                st.session_state.editing_question_index = None
-                                st.success("Question updated.")
-                                st.rerun()
+                with col_q2:
+                    add_more = st.form_submit_button("➕ Add Another Question", key="add_more_question_btn")
 
-                        with colB:
-                            if st.form_submit_button("❌ Cancel", key=f"cancel_edit_{i}"):
-                                st.session_state.editing_question_index = None
-                                st.rerun()
-
+                if save_q or add_more:
+                    if not q_text.strip() or any(c.strip() == "" for c in choices):
+                        st.error("Please fill in the question and all choices.")
                     else:
-                        st.markdown(f"**Q{i+1}. {q['question']}**")
+                        st.session_state.quiz_builder["questions"].append({
+                            "question": q_text.strip(),
+                            "choices": choices,
+                            "correct_index": correct_index,
+                        })
 
-                        for j, c in enumerate(q["choices"]):
-                            icon = "✅" if j == q["correct_index"] else "➖"
-                            st.write(f"{icon} {c}")
+                        st.success("Question added!")
+                        st.rerun()
 
-                        col1, col2 = st.columns(2)
+                st.markdown("### 📋 Current Questions")
+                questions = st.session_state.quiz_builder["questions"]
 
-                        with col1:
-                            if st.form_submit_button("✏️ Edit", key=f"edit_q_{i}"):
-                                st.session_state.editing_question_index = i
-                                st.rerun()
+                if not questions:
+                    st.caption("No questions added yet.")
+                else:
+                    for i, q in enumerate(questions):
 
-                        with col2:
-                            if st.form_submit_button("🗑️ Delete", key=f"delete_q_{i}"):
-                                questions.pop(i)
-                                st.rerun()
+                        if st.session_state.editing_question_index == i:
 
-        # ------------------------
-        # COMMON FIELDS
-        # ------------------------
-        item_instruction = st.text_area(
-            "Subunit instructions (optional)",
-            placeholder="Page Instruction"
-        )
+                            st.markdown(f"### ✏️ Editing Question {i+1}")
 
-        uploaded_files = st.file_uploader(
-            "Upload files (multiple images allowed)",
-            key=f"uploader_{st.session_state.uploader_key}",
-            accept_multiple_files=True
-        )
+                            new_q_text = st.text_input(
+                                "Question text",
+                                value=q["question"],
+                                key=f"edit_qtext_{i}"
+                            )
 
-        # ------------------------
-        # MUST BE INSIDE FORM
-        # ------------------------
-        add_item = st.form_submit_button("➕ Add item")
-        create_unit = st.form_submit_button("Create Unit")
-        cancel = st.form_submit_button("Cancel")
+                            st.markdown("Answer choices")
+
+                            new_choices = [
+                                st.text_input(
+                                    f"Choice {j+1}",
+                                    value=c,
+                                    key=f"edit_choice_{i}_{j}"
+                                )
+                                for j, c in enumerate(q["choices"])
+                            ]
+
+                            new_correct = st.radio(
+                                "Correct answer",
+                                options=range(len(new_choices)),
+                                index=q["correct_index"],
+                                format_func=lambda k: f"Choice {k+1}",
+                                key=f"edit_correct_{i}"
+                            )
+
+                            colA, colB = st.columns(2)
+
+                            with colA:
+                                if st.form_submit_button("💾 Save", key=f"save_edit_{i}"):
+                                    questions[i] = {
+                                        "question": new_q_text.strip(),
+                                        "choices": new_choices,
+                                        "correct_index": new_correct
+                                    }
+                                    st.session_state.editing_question_index = None
+                                    st.success("Question updated.")
+                                    st.rerun()
+
+                            with colB:
+                                if st.form_submit_button("❌ Cancel", key=f"cancel_edit_{i}"):
+                                    st.session_state.editing_question_index = None
+                                    st.rerun()
+
+                        else:
+                            st.markdown(f"**Q{i+1}. {q['question']}**")
+
+                            for j, c in enumerate(q["choices"]):
+                                icon = "✅" if j == q["correct_index"] else "➖"
+                                st.write(f"{icon} {c}")
+
+                            col1, col2 = st.columns(2)
+
+                            with col1:
+                                if st.form_submit_button("✏️ Edit", key=f"edit_q_{i}"):
+                                    st.session_state.editing_question_index = i
+                                    st.rerun()
+
+                            with col2:
+                                if st.form_submit_button("🗑️ Delete", key=f"delete_q_{i}"):
+                                    questions.pop(i)
+                                    st.rerun()
+
+            # ------------------------
+            # COMMON FIELDS
+            # ------------------------
+            item_instruction = st.text_area(
+                "Subunit instructions (optional)",
+                placeholder="Page Instruction"
+            )
+
+            uploaded_files = st.file_uploader(
+                "Upload files (multiple images allowed)",
+                key=f"uploader_{st.session_state.uploader_key}",
+                accept_multiple_files=True
+            )
+
+            # ------------------------
+            # MUST BE INSIDE FORM
+            # ------------------------
+            add_item = st.form_submit_button("➕ Add item")
+            create_unit = st.form_submit_button("Create Unit")
+            cancel = st.form_submit_button("Cancel")
 
     if add_item:
         if not item_title.strip():
