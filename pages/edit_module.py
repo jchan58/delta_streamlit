@@ -329,7 +329,7 @@ if st.session_state.show_create_unit:
                 st.session_state.item_instruction = ""
                 st.session_state.item_files = None
                 st.session_state.item_type = "video"
-
+                st.rerun()
     if cancel:
         st.session_state.show_create_unit = False
         st.session_state.new_unit_items = []
